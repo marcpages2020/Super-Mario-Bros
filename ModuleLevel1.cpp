@@ -20,7 +20,7 @@ bool ModuleLevel1::Start()
 {
 	LOG("Loading space scene");
 	
-	background = App->textures->Load("rtype/background.png");
+	background = App->textures->Load("Assets/Sprites/Maps/world_1-1.png");
 
 	App->player->Enable();
 	App->particles->Enable();

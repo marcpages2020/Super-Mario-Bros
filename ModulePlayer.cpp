@@ -8,14 +8,15 @@
 #include "ModuleFadeToBlack.h"
 #include "ModulePlayer.h"
 #include "ModuleSlowdown.h"
+#include "SDL/include/SDL.h"
 
-// Reference at https://www.youtube.com/watch?v=OEhmUuehGOA
 
 ModulePlayer::ModulePlayer()
 {
-	// idle animation (just the ship)
-	idle.PushBack({66, 1, 32, 14});
+	// idle 
+	idle.PushBack({19, 43, 13, 17});
 
+	/*
 	// move upwards
 	up.PushBack({100, 1, 32, 14});
 	up.PushBack({132, 0, 32, 14});
@@ -27,6 +28,7 @@ ModulePlayer::ModulePlayer()
 	down.PushBack({0, 1, 32, 14});
 	down.loop = false;
 	down.speed = 0.1f;
+	*/
 }
 
 ModulePlayer::~ModulePlayer()
@@ -37,12 +39,12 @@ bool ModulePlayer::Start()
 {
 	LOG("Loading player");
 
-	graphics = App->textures->Load("rtype/ship.png");
+	graphics = App->textures->Load("Assets/sprites/Characters/mario.png");
 
 	destroyed = false;
 	position.x = 150;
-	position.y = 120;
-
+	position.y = 183;
+	jumpTime = 0;
 	col = App->collision->AddCollider({position.x, position.y, 32, 16}, COLLIDER_PLAYER, this);
 
 	return true;
@@ -59,17 +61,22 @@ bool ModulePlayer::CleanUp()
 	return true;
 }
 
+update_status ModulePlayer::PreUpdate() {
+	
+	return UPDATE_CONTINUE;
+}
 // Update: draw background
 update_status ModulePlayer::Update()
 {
 	//position.x += 1; // Automatic movement
 
 	int speed = 1;
-
+	
 	if(App->input->keyboard[SDL_SCANCODE_A] == KEY_STATE::KEY_REPEAT)
 	{
 		position.x -= speed;
 		App->render->camera.x -= speed;
+
 	}
 
 	if(App->input->keyboard[SDL_SCANCODE_D] == KEY_STATE::KEY_REPEAT)
@@ -80,21 +87,22 @@ update_status ModulePlayer::Update()
 
 	if(App->input->keyboard[SDL_SCANCODE_S] == KEY_STATE::KEY_REPEAT)
 	{
-		position.y += speed;
+		/*position.y += speed;
 		if(current_animation != &down)
 		{
 			down.Reset();
 			current_animation = &down;
-		}
+		}*/
 	}
-
+	
 	if(App->input->keyboard[SDL_SCANCODE_W] == KEY_STATE::KEY_REPEAT)
 	{
 		position.y -= speed;
-		if(current_animation != &up)
+		if((current_animation != &jump)&&(isFalling == false))
 		{
-			up.Reset();
-			current_animation = &up;
+			jump.Reset();
+			current_animation = &jump;
+			jumpTime = SDL_GetTicks();
 		}
 	}
 
@@ -107,13 +115,15 @@ update_status ModulePlayer::Update()
 	if(App->input->keyboard[SDL_SCANCODE_S] == KEY_STATE::KEY_IDLE
 	   && App->input->keyboard[SDL_SCANCODE_W] == KEY_STATE::KEY_IDLE)
 		current_animation = &idle;
+	
 
 	col->SetPos(position.x, position.y);
 
 	// Draw everything --------------------------------------
 	if(destroyed == false)
 		App->render->Blit(graphics, position.x, position.y, &(current_animation->GetCurrentFrame()));
-
+	
+	Gravity();
 	return UPDATE_CONTINUE;
 }
 
@@ -131,5 +141,13 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 		App->particles->AddParticle(App->particles->explosion, position.x - 4, position.y - 4, COLLIDER_NONE, 350);
 
 		destroyed = true;
+	}
+}
+
+void ModulePlayer::Gravity(int floor) {
+	jumpTime = SDL_GetTicks() - jumpTime;
+	if (position.y < floor)
+	{
+		position.y = position.y + jumpSpeed*jumpTime + 1/2 * gravity * pow(jumpTime,2);
 	}
 }
