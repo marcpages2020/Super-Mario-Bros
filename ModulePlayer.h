@@ -13,6 +13,8 @@ IDLE,
 FORWARD,
 BACKWARD,
 JUMP,
+JUMP_FORWARD,
+JUMP_BACKWARD,
 CROUCH
 };
 
@@ -47,15 +49,17 @@ public:
 	Animation jump;
 	Animation crouch;
 	iPoint position;
+	iPoint last_position;
 	Collider* col;
 	PlayerInput player_input;
 	bool destroyed = false;
 	bool isFalling = false;
-	float jumpSpeed = 7.50f;
-	float gravity = 19.8f;
+	float vy = 0;
+	float gravity = 21.8f;
 	float jumpTime = 0;
 	float jumpMoment = 0;
 	float deltaTime = 0;
+	SDL_RendererFlip flip = SDL_FLIP_NONE;
 };
 
 #endif

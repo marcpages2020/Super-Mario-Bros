@@ -16,15 +16,15 @@ ModulePlayer::ModulePlayer()
 	// idle 
 	idle.PushBack({19, 43, 13, 17});
 
-	/*
-	// move upwards
-	up.PushBack({100, 1, 32, 14});
-	up.PushBack({132, 0, 32, 14});
-	up.loop = false;
-	up.speed = 0.1f;
-	*/
+	//forward 
+	forward.PushBack({35,43,12,17});
+	forward.PushBack({50,43,11,17 });
+	forward.PushBack({64,43,15,17 });
+	forward.speed = 0.15f;
+
 	//jump 
 	jump.PushBack({ 98,44,16,16 });
+
 
 	// Move down
 	/*
@@ -49,7 +49,7 @@ bool ModulePlayer::Start()
 	position.x = 150;
 	position.y = 183;
 	jumpTime = 0;
-	col = App->collision->AddCollider({position.x, position.y, 32, 16}, COLLIDER_PLAYER, this);
+	col = App->collision->AddCollider({0, 0, 12, 17}, COLLIDER_PLAYER, this);
 	current_animation = &idle;
 	return true;
 }
@@ -68,6 +68,7 @@ bool ModulePlayer::CleanUp()
 update_status ModulePlayer::PreUpdate() {
 
 	deltaTime = SDL_GetTicks();
+	last_position = position;
 
 	if (App->input->keyboard[SDL_SCANCODE_F3] == KEY_STATE::KEY_DOWN)
 	{
@@ -79,9 +80,7 @@ update_status ModulePlayer::PreUpdate() {
 	player_input.pressing_S = App->input->keyboard[SDL_SCANCODE_S] == KEY_REPEAT;
 	player_input.pressing_D = App->input->keyboard[SDL_SCANCODE_D] == KEY_REPEAT;
 
-	switch (state)
-	{
-	case IDLE:
+	if (state == IDLE) {
 		if (player_input.pressing_A)
 		{
 			state = BACKWARD;
@@ -92,8 +91,9 @@ update_status ModulePlayer::PreUpdate() {
 		}
 		else if ((player_input.pressing_W) && (isFalling == false))
 		{
-			position.y--;
 			state = JUMP;
+			vy = 8.5f;
+			position.y--;
 			jumpMoment = SDL_GetTicks();
 			isFalling = true;
 		}
@@ -101,52 +101,108 @@ update_status ModulePlayer::PreUpdate() {
 		{
 			state = CROUCH;
 		}
-		break;
-	case FORWARD:
-		if (!player_input.pressing_D)
-		{
-			state = IDLE;
+	}
+	if (state == FORWARD) {
+			if (!player_input.pressing_D)
+			{
+				state = IDLE;
+			}
+			if (player_input.pressing_W)
+			{
+				state = JUMP_FORWARD;
+				vy = 8.5f;
+				position.y--;
+				jumpMoment = SDL_GetTicks();
+				isFalling = true;
+			}
 		}
-		break;
-	case BACKWARD:
-		if (!player_input.pressing_A)
+	if (state == BACKWARD){
+			if (!player_input.pressing_A)
+			{
+				state = IDLE;
+			}
+		if (player_input.pressing_W)
 		{
-			state = IDLE;
+			state = JUMP_BACKWARD;
+			vy = 8.5f;
+			position.y--;
+			jumpMoment = SDL_GetTicks();
+			isFalling = true;
 		}
-		break;
-	case CROUCH:
+	}
+	if (state == CROUCH) {
 		if (!player_input.pressing_S)
 		{
 			state = IDLE;
 		}
-		break;
-	default:
-		break;
+	}
+	if (state == JUMP)
+	{
+		if (player_input.pressing_D)
+		{
+			position.x++;
+		}
+		if (player_input.pressing_A)
+		{
+			position.x--;
+		}
+	}
+	if (state == JUMP_FORWARD) {
+		if (player_input.pressing_D)
+		{
+			position.x++;
+		}
+		if (player_input.pressing_A)
+		{
+			position.x--;
+		}
+
+	}
+	if (state == JUMP_BACKWARD) {
+		if (player_input.pressing_A)
+		{
+			position.x--;
+		}
+		if (player_input.pressing_D)
+		{
+			position.x++;
+		}
 	}
 	return UPDATE_CONTINUE;
 }
 // Update: draw background
 update_status ModulePlayer::Update()
 {
-	//position.x += 1; // Automatic movement
-
 	int speed = 1;
-	
+
 	switch (state)
 	{
 	case IDLE:
 		current_animation = &idle;
+		//flip = SDL_FLIP_NONE;
 		break;
 	case FORWARD:
 		position.x += speed;
 		App->render->camera.x += speed;
+		current_animation = &forward;
+		flip = SDL_FLIP_NONE;
 		break;
 	case BACKWARD:
 		position.x -= speed;
 		if(App->render->camera.x >0)App->render->camera.x -= speed;
+		current_animation = &forward;
+		flip = SDL_FLIP_HORIZONTAL;
 		break;
 	case JUMP:
-			current_animation = &jump;
+		current_animation = &jump;
+		break;
+	case JUMP_FORWARD:
+		current_animation = &jump;
+		flip = SDL_FLIP_NONE;
+		break;
+	case JUMP_BACKWARD:
+		current_animation = &jump;
+		flip = SDL_FLIP_HORIZONTAL;
 		break;
 	default:
 		break;
@@ -166,10 +222,10 @@ update_status ModulePlayer::Update()
 
 	// Draw everything --------------------------------------
 	if(destroyed == false)
-		App->render->Blit(graphics, position.x, position.y, &(current_animation->GetCurrentFrame()));
+		App->render->Blit(graphics, position.x, position.y, &(current_animation->GetCurrentFrame()),flip);
 	if (position.y == 150)
 	{
-	LOG("Debug");
+	//LOG("Debug");
 	}
 	Gravity(183);
 	return UPDATE_CONTINUE;
@@ -178,7 +234,7 @@ update_status ModulePlayer::Update()
 
 void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 {
-	if(c1 == col && destroyed == false && App->fade->IsFading() == false)
+	/*if(c1 == col && destroyed == false && App->fade->IsFading() == false)
 	{
 		App->fade->FadeToBlack((Module*)App->level_1, (Module*)App->scene_intro);
 
@@ -189,20 +245,40 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 		App->particles->AddParticle(App->particles->explosion, position.x - 4, position.y - 4, COLLIDER_NONE, 350);
 
 		destroyed = true;
+	}*/
+	switch (c2->type)
+	{
+	case COLLIDER_WALL:
+
+		if ((position.y > c2->rect.y + c2->rect.h)|| (position.y > c2->rect.y + c2->rect.h-5))
+		{
+			vy = 0;
+		}
+		if (position.y < c2->rect.y)
+		{
+				position.y = c2->rect.y - current_animation->GetCurrentFrame().h-1;
+				vy = 0;
+				isFalling = false;
+				state = IDLE;
+				
+		}
+		/*
+		if (position.y > 183){
+			vy = 0;
+			position.y = 183;
+			state = IDLE;
+			isFalling = false;
+		}
+		*/
+	break;
+	default:
+		break;
 	}
 }
 
 void ModulePlayer::Gravity(int floor) {
 	jumpTime = (deltaTime - jumpMoment)/1000;
-	if (position.y < floor)
-	{
-		position.y = position.y - jumpSpeed * jumpTime + (0.5f * gravity * pow(jumpTime,2));
-	}
-	else
-	{
-		state = IDLE;
-		isFalling = false;
-		position.y = floor;
-		jump.Reset();
+	if (isFalling == true) {
+		position.y = position.y - vy * jumpTime + (0.5f * gravity * pow(jumpTime, 2));
 	}
 }

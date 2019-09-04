@@ -30,9 +30,13 @@ bool ModuleLevel1::Start()
 	//App->audio->PlayMusic("rtype/stage1.ogg", 1.0f);
 	
 	// Colliders ---
-	App->collision->AddCollider({0, 224, 3930, 16}, COLLIDER_WALL);
-	App->collision->AddCollider({1375, 0, 111, 96}, COLLIDER_WALL);
-	App->collision->AddCollider({1375, 145, 111, 96}, COLLIDER_WALL);
+	//floors
+	App->collision->AddCollider({0, 201, 1104, 24}, COLLIDER_WALL);
+	//surprise boxes
+	App->collision->AddCollider({ 256, 136, 16, 16 }, COLLIDER_WALL);
+	App->collision->AddCollider({ 352, 72, 16, 16 }, COLLIDER_WALL);
+	//blocks
+	App->collision->AddCollider({ 321, 136, 79, 16 }, COLLIDER_WALL);	
 
 	// Enemies ---
 	App->enemies->AddEnemy(ENEMY_TYPES::REDBIRD, 600, 80);
