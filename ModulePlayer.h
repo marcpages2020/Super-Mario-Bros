@@ -12,7 +12,16 @@ enum State {
 IDLE,
 FORWARD,
 BACKWARD,
-JUMP
+JUMP,
+CROUCH
+};
+
+struct PlayerInput {
+
+	bool pressing_A;
+	bool pressing_D;
+	bool pressing_W;
+	bool pressing_S;
 };
 
 class ModulePlayer : public Module
@@ -29,7 +38,7 @@ public:
 	void Gravity(int floor = 183);
 
 public:
-
+	State state;
 	SDL_Texture* graphics = nullptr;
 	Animation* current_animation = nullptr;
 	Animation idle;
@@ -39,11 +48,14 @@ public:
 	Animation crouch;
 	iPoint position;
 	Collider* col;
+	PlayerInput player_input;
 	bool destroyed = false;
 	bool isFalling = false;
-	float jumpSpeed = 2;
-	float gravity;
+	float jumpSpeed = 7.50f;
+	float gravity = 19.8f;
 	float jumpTime = 0;
+	float jumpMoment = 0;
+	float deltaTime = 0;
 };
 
 #endif

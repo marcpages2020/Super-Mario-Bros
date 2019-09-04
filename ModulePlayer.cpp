@@ -22,8 +22,12 @@ ModulePlayer::ModulePlayer()
 	up.PushBack({132, 0, 32, 14});
 	up.loop = false;
 	up.speed = 0.1f;
+	*/
+	//jump 
+	jump.PushBack({ 98,44,16,16 });
 
 	// Move down
+	/*
 	down.PushBack({33, 1, 32, 14});
 	down.PushBack({0, 1, 32, 14});
 	down.loop = false;
@@ -46,7 +50,7 @@ bool ModulePlayer::Start()
 	position.y = 183;
 	jumpTime = 0;
 	col = App->collision->AddCollider({position.x, position.y, 32, 16}, COLLIDER_PLAYER, this);
-
+	current_animation = &idle;
 	return true;
 }
 
@@ -62,7 +66,63 @@ bool ModulePlayer::CleanUp()
 }
 
 update_status ModulePlayer::PreUpdate() {
-	
+
+	deltaTime = SDL_GetTicks();
+
+	if (App->input->keyboard[SDL_SCANCODE_F3] == KEY_STATE::KEY_DOWN)
+	{
+		App->render->camera.y = position.y;
+	}
+
+	player_input.pressing_W = App->input->keyboard[SDL_SCANCODE_W] == KEY_DOWN;
+	player_input.pressing_A = App->input->keyboard[SDL_SCANCODE_A] == KEY_REPEAT;
+	player_input.pressing_S = App->input->keyboard[SDL_SCANCODE_S] == KEY_REPEAT;
+	player_input.pressing_D = App->input->keyboard[SDL_SCANCODE_D] == KEY_REPEAT;
+
+	switch (state)
+	{
+	case IDLE:
+		if (player_input.pressing_A)
+		{
+			state = BACKWARD;
+		}
+		else if (player_input.pressing_D)
+		{
+			state = FORWARD;
+		}
+		else if ((player_input.pressing_W) && (isFalling == false))
+		{
+			position.y--;
+			state = JUMP;
+			jumpMoment = SDL_GetTicks();
+			isFalling = true;
+		}
+		else if (player_input.pressing_S)
+		{
+			state = CROUCH;
+		}
+		break;
+	case FORWARD:
+		if (!player_input.pressing_D)
+		{
+			state = IDLE;
+		}
+		break;
+	case BACKWARD:
+		if (!player_input.pressing_A)
+		{
+			state = IDLE;
+		}
+		break;
+	case CROUCH:
+		if (!player_input.pressing_S)
+		{
+			state = IDLE;
+		}
+		break;
+	default:
+		break;
+	}
 	return UPDATE_CONTINUE;
 }
 // Update: draw background
@@ -72,58 +132,46 @@ update_status ModulePlayer::Update()
 
 	int speed = 1;
 	
-	if(App->input->keyboard[SDL_SCANCODE_A] == KEY_STATE::KEY_REPEAT)
+	switch (state)
 	{
-		position.x -= speed;
-		App->render->camera.x -= speed;
-
-	}
-
-	if(App->input->keyboard[SDL_SCANCODE_D] == KEY_STATE::KEY_REPEAT)
-	{
+	case IDLE:
+		current_animation = &idle;
+		break;
+	case FORWARD:
 		position.x += speed;
 		App->render->camera.x += speed;
-	}
-
-	if(App->input->keyboard[SDL_SCANCODE_S] == KEY_STATE::KEY_REPEAT)
-	{
-		/*position.y += speed;
-		if(current_animation != &down)
-		{
-			down.Reset();
-			current_animation = &down;
-		}*/
-	}
-	
-	if(App->input->keyboard[SDL_SCANCODE_W] == KEY_STATE::KEY_REPEAT)
-	{
-		position.y -= speed;
-		if((current_animation != &jump)&&(isFalling == false))
-		{
-			jump.Reset();
+		break;
+	case BACKWARD:
+		position.x -= speed;
+		if(App->render->camera.x >0)App->render->camera.x -= speed;
+		break;
+	case JUMP:
 			current_animation = &jump;
-			jumpTime = SDL_GetTicks();
-		}
+		break;
+	default:
+		break;
 	}
 
 	if(App->input->keyboard[SDL_SCANCODE_SPACE] == KEY_STATE::KEY_DOWN)
 	{
-		App->particles->AddParticle(App->particles->laser, position.x + 20, position.y, COLLIDER_PLAYER_SHOT);
-		//TODO 3: Call the camera shake whenever the players shoots a laser	
+		App->particles->AddParticle(App->particles->laser, position.x + 20, position.y, COLLIDER_PLAYER_SHOT);	
 	}
 
-	if(App->input->keyboard[SDL_SCANCODE_S] == KEY_STATE::KEY_IDLE
+	/*if(App->input->keyboard[SDL_SCANCODE_S] == KEY_STATE::KEY_IDLE
 	   && App->input->keyboard[SDL_SCANCODE_W] == KEY_STATE::KEY_IDLE)
 		current_animation = &idle;
-	
+	*/
 
 	col->SetPos(position.x, position.y);
 
 	// Draw everything --------------------------------------
 	if(destroyed == false)
 		App->render->Blit(graphics, position.x, position.y, &(current_animation->GetCurrentFrame()));
-	
-	Gravity();
+	if (position.y == 150)
+	{
+	LOG("Debug");
+	}
+	Gravity(183);
 	return UPDATE_CONTINUE;
 }
 
@@ -145,9 +193,16 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 }
 
 void ModulePlayer::Gravity(int floor) {
-	jumpTime = SDL_GetTicks() - jumpTime;
+	jumpTime = (deltaTime - jumpMoment)/1000;
 	if (position.y < floor)
 	{
-		position.y = position.y + jumpSpeed*jumpTime + 1/2 * gravity * pow(jumpTime,2);
+		position.y = position.y - jumpSpeed * jumpTime + (0.5f * gravity * pow(jumpTime,2));
+	}
+	else
+	{
+		state = IDLE;
+		isFalling = false;
+		position.y = floor;
+		jump.Reset();
 	}
 }
