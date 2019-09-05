@@ -13,7 +13,7 @@ enum COLLIDER_TYPE
 	COLLIDER_ENEMY,
 	COLLIDER_PLAYER_SHOT,
 	COLLIDER_ENEMY_SHOT,
-
+	COLLIDER_MYSTERY_BOX,
 	COLLIDER_MAX
 };
 
@@ -34,6 +34,11 @@ struct Collider
 	{
 		rect.x = x;
 		rect.y = y;
+	}
+
+	void SetSize(int w, int h) {
+		rect.w = w;
+		rect.h = h;
 	}
 
 	bool CheckCollision(const SDL_Rect& r) const;
@@ -59,7 +64,7 @@ private:
 
 	Collider* colliders[MAX_COLLIDERS];
 	bool matrix[COLLIDER_MAX][COLLIDER_MAX];
-	bool debug = false;
+	bool debug = true;
 };
 
 #endif // __ModuleCollision_H__

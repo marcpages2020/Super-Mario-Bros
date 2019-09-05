@@ -46,10 +46,11 @@ bool ModulePlayer::Start()
 	graphics = App->textures->Load("Assets/sprites/Characters/mario.png");
 
 	destroyed = false;
-	position.x = 150;
+	position.x = 350;
 	position.y = 183;
 	jumpTime = 0;
 	col = App->collision->AddCollider({0, 0, 12, 17}, COLLIDER_PLAYER, this);
+	floor_col = App->collision->AddCollider({ 0,0,12,17 },COLLIDER_PLAYER, this);
 	current_animation = &idle;
 	return true;
 }
@@ -72,7 +73,8 @@ update_status ModulePlayer::PreUpdate() {
 
 	if (App->input->keyboard[SDL_SCANCODE_F3] == KEY_STATE::KEY_DOWN)
 	{
-		App->render->camera.y = position.y;
+		LOG("Debug");
+		//App->render->camera.y = position.y;
 	}
 
 	player_input.pressing_W = App->input->keyboard[SDL_SCANCODE_W] == KEY_DOWN;
@@ -174,6 +176,7 @@ update_status ModulePlayer::PreUpdate() {
 update_status ModulePlayer::Update()
 {
 	int speed = 1;
+	last_position = position;
 
 	switch (state)
 	{
@@ -189,9 +192,10 @@ update_status ModulePlayer::Update()
 		break;
 	case BACKWARD:
 		position.x -= speed;
-		if(App->render->camera.x >0)App->render->camera.x -= speed;
 		current_animation = &forward;
 		flip = SDL_FLIP_HORIZONTAL;
+		//to be deleted
+		App->render->camera.x += speed;
 		break;
 	case JUMP:
 		current_animation = &jump;
@@ -219,15 +223,17 @@ update_status ModulePlayer::Update()
 	*/
 
 	col->SetPos(position.x, position.y);
-
+	floor_col->SetPos(position.x, position.y + current_animation->GetCurrentFrame().h);
+	floor_col->SetSize(current_animation->GetCurrentFrame().w, 2);
 	// Draw everything --------------------------------------
 	if(destroyed == false)
 		App->render->Blit(graphics, position.x, position.y, &(current_animation->GetCurrentFrame()),flip);
-	if (position.y == 150)
+
+	if ((colliding = false))
 	{
-	//LOG("Debug");
+		isFalling = true;
 	}
-	Gravity(183);
+	Gravity();
 	return UPDATE_CONTINUE;
 }
 
@@ -246,37 +252,73 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 
 		destroyed = true;
 	}*/
-	switch (c2->type)
+	if (c1 == col)
 	{
-	case COLLIDER_WALL:
+		switch (c2->type)
+		{
+		case COLLIDER_WALL:
 
-		if ((position.y > c2->rect.y + c2->rect.h)|| (position.y > c2->rect.y + c2->rect.h-5))
-		{
-			vy = 0;
-		}
-		if (position.y < c2->rect.y)
-		{
-				position.y = c2->rect.y - current_animation->GetCurrentFrame().h-1;
+			position = last_position;
+
+			//floor
+			if (position.y + current_animation->GetCurrentFrame().h / 2 < c2->rect.y)
+			{
+				state = IDLE;
+				position.y = c2->rect.y - current_animation->GetCurrentFrame().h;
 				vy = 0;
 				isFalling = false;
+			}
+
+			//ceiling
+			if ((position.y > c2->rect.y + c2->rect.h) || (position.y > c2->rect.y + c2->rect.h - 5))
+			{
+				vy = 0;
+				position.y = c2->rect.y + c2->rect.h;
+			}
+
+			break;
+		case COLLIDER_MYSTERY_BOX:
+
+			position = last_position;
+
+			//mario on
+			if (position.y + current_animation->GetCurrentFrame().h / 2 < c2->rect.y)
+			{
 				state = IDLE;
-				
+				position.y = c2->rect.y - current_animation->GetCurrentFrame().h;
+				vy = 0;
+				isFalling = false;
+			}
+
+			//mario under
+			if ((position.y > c2->rect.y + c2->rect.h) || (position.y > c2->rect.y + c2->rect.h - 5))
+			{
+				vy = 0;
+				position.y = c2->rect.y + c2->rect.h;
+			}
+
+			break;
+		default:
+			break;
 		}
-		/*
-		if (position.y > 183){
-			vy = 0;
-			position.y = 183;
-			state = IDLE;
-			isFalling = false;
-		}
-		*/
-	break;
-	default:
-		break;
 	}
+	else if (c1 == floor_col)
+	{
+		switch (c2->type)
+		{
+		case COLLIDER_NONE:
+			if (wasFalling == false)
+			{
+				isFalling = true;
+			}
+		default:
+			break;
+		}
+	}
+	colliding = true;
 }
 
-void ModulePlayer::Gravity(int floor) {
+void ModulePlayer::Gravity() {
 	jumpTime = (deltaTime - jumpMoment)/1000;
 	if (isFalling == true) {
 		position.y = position.y - vy * jumpTime + (0.5f * gravity * pow(jumpTime, 2));

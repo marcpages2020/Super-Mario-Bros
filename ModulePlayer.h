@@ -37,7 +37,7 @@ public:
 	update_status PreUpdate();
 	bool CleanUp();
 	void OnCollision(Collider* c1, Collider* c2);
-	void Gravity(int floor = 183);
+	void Gravity();
 
 public:
 	State state;
@@ -51,9 +51,12 @@ public:
 	iPoint position;
 	iPoint last_position;
 	Collider* col;
+	Collider* floor_col;
 	PlayerInput player_input;
 	bool destroyed = false;
 	bool isFalling = false;
+	bool wasFalling = false;
+	bool colliding = false;
 	float vy = 0;
 	float gravity = 21.8f;
 	float jumpTime = 0;

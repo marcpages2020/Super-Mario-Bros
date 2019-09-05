@@ -31,12 +31,19 @@ bool ModuleLevel1::Start()
 	
 	// Colliders ---
 	//floors
-	App->collision->AddCollider({0, 201, 1104, 24}, COLLIDER_WALL);
-	//surprise boxes
-	App->collision->AddCollider({ 256, 136, 16, 16 }, COLLIDER_WALL);
-	App->collision->AddCollider({ 352, 72, 16, 16 }, COLLIDER_WALL);
+	App->collision->AddCollider({0, 200, 1104, 24}, COLLIDER_WALL);
+	//mystery boxes
+	App->collision->AddCollider({ 256, 136, 16, 16 }, COLLIDER_MYSTERY_BOX);
+	App->collision->AddCollider({ 352, 72, 16, 16 }, COLLIDER_MYSTERY_BOX);
 	//blocks
 	App->collision->AddCollider({ 321, 136, 79, 16 }, COLLIDER_WALL);	
+	//tubes
+	//1
+	App->collision->AddCollider({ 448, 168, 32, 14 }, COLLIDER_WALL); //up
+	App->collision->AddCollider({ 450, 182, 28, 18 }, COLLIDER_WALL); //down
+	//2
+	App->collision->AddCollider({ 608, 152, 32, 14 }, COLLIDER_WALL); //up
+	App->collision->AddCollider({ 610, 167, 28, 33 }, COLLIDER_WALL); //down
 
 	// Enemies ---
 	App->enemies->AddEnemy(ENEMY_TYPES::REDBIRD, 600, 80);
