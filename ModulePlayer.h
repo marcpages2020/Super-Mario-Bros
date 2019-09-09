@@ -9,13 +9,14 @@ struct SDL_Texture;
 struct Collider;
 
 enum State {
-IDLE,
-FORWARD,
-BACKWARD,
-JUMP,
-JUMP_FORWARD,
-JUMP_BACKWARD,
-CROUCH
+	IDLE,
+	FORWARD,
+	BACKWARD,
+	JUMP,
+	JUMP_FORWARD,
+	JUMP_BACKWARD,
+	CROUCH,
+	DIE
 };
 
 struct PlayerInput {
@@ -53,6 +54,8 @@ public:
 	Collider* col;
 	Collider* floor_col;
 	PlayerInput player_input;
+	int floor_left;
+	int floor_right;
 	bool destroyed = false;
 	bool isFalling = false;
 	bool wasFalling = false;

@@ -7,6 +7,12 @@
 struct SDL_Texture;
 struct Collider;
 
+enum Enemy_State {
+	ENEMY_MOVE,
+	ENEMY_ATTACK,
+	ENEMY_DIE
+};
+
 class Enemy
 {
 protected:
@@ -25,6 +31,7 @@ public:
 	virtual void Move() {};
 	virtual void Draw(SDL_Texture* sprites);
 	virtual void OnCollision(Collider* collider);
+	Enemy_State enemy_state;
 };
 
 #endif // __ENEMY_H__

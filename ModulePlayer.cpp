@@ -9,7 +9,7 @@
 #include "ModulePlayer.h"
 #include "ModuleSlowdown.h"
 #include "SDL/include/SDL.h"
-
+#include "ModuleCollision.h"
 
 ModulePlayer::ModulePlayer()
 {
@@ -46,11 +46,11 @@ bool ModulePlayer::Start()
 	graphics = App->textures->Load("Assets/sprites/Characters/mario.png");
 
 	destroyed = false;
-	position.x = 350;
+	position.x = 180;
 	position.y = 183;
 	jumpTime = 0;
 	col = App->collision->AddCollider({0, 0, 12, 17}, COLLIDER_PLAYER, this);
-	floor_col = App->collision->AddCollider({ 0,0,12,17 },COLLIDER_PLAYER, this);
+	floor_col = App->collision->AddCollider({ 0,0,12,17 },COLLIDER_PLAYER_ATTACK, this);
 	current_animation = &idle;
 	return true;
 }
@@ -195,7 +195,7 @@ update_status ModulePlayer::Update()
 		current_animation = &forward;
 		flip = SDL_FLIP_HORIZONTAL;
 		//to be deleted
-		App->render->camera.x += speed;
+		App->render->camera.x -= speed;
 		break;
 	case JUMP:
 		current_animation = &jump;
@@ -211,11 +211,13 @@ update_status ModulePlayer::Update()
 	default:
 		break;
 	}
-
+   
+	/*
 	if(App->input->keyboard[SDL_SCANCODE_SPACE] == KEY_STATE::KEY_DOWN)
 	{
-		App->particles->AddParticle(App->particles->laser, position.x + 20, position.y, COLLIDER_PLAYER_SHOT);	
+		App->particles->AddParticle(App->particles->laser, position.x + 20, position.y, COLLIDER_PLAYER_ATTACK);	
 	}
+	*/
 
 	/*if(App->input->keyboard[SDL_SCANCODE_S] == KEY_STATE::KEY_IDLE
 	   && App->input->keyboard[SDL_SCANCODE_W] == KEY_STATE::KEY_IDLE)
@@ -237,21 +239,9 @@ update_status ModulePlayer::Update()
 	return UPDATE_CONTINUE;
 }
 
-
 void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 {
-	/*if(c1 == col && destroyed == false && App->fade->IsFading() == false)
-	{
-		App->fade->FadeToBlack((Module*)App->level_1, (Module*)App->scene_intro);
 
-		App->particles->AddParticle(App->particles->explosion, position.x, position.y, COLLIDER_NONE, 150);
-		App->particles->AddParticle(App->particles->explosion, position.x + 8, position.y + 11, COLLIDER_NONE, 220);
-		App->particles->AddParticle(App->particles->explosion, position.x - 7, position.y + 12, COLLIDER_NONE, 670);
-		App->particles->AddParticle(App->particles->explosion, position.x + 5, position.y - 5, COLLIDER_NONE, 480);
-		App->particles->AddParticle(App->particles->explosion, position.x - 4, position.y - 4, COLLIDER_NONE, 350);
-
-		destroyed = true;
-	}*/
 	if (c1 == col)
 	{
 		switch (c2->type)
@@ -320,7 +310,9 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 
 void ModulePlayer::Gravity() {
 	jumpTime = (deltaTime - jumpMoment)/1000;
+
 	if (isFalling == true) {
 		position.y = position.y - vy * jumpTime + (0.5f * gravity * pow(jumpTime, 2));
 	}
 }
+

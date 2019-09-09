@@ -3,6 +3,7 @@
 #include "ModuleCollision.h"
 #include "ModuleParticles.h"
 #include "ModuleRender.h"
+#include "ModulePlayer.h"
 
 Enemy::Enemy(int x, int y) : position(x, y)
 {}
@@ -29,5 +30,15 @@ void Enemy::Draw(SDL_Texture* sprites)
 
 void Enemy::OnCollision(Collider* collider)
 {
-	App->particles->AddParticle(App->particles->explosion, position.x, position.y);
+	switch (collider->type)
+	{
+	case COLLIDER_PLAYER:
+		App->player->state = DIE;
+		break;
+	case COLLIDER_PLAYER_ATTACK:
+		enemy_state = ENEMY_DIE;
+		break;
+	default:
+		break;
+	}
 }

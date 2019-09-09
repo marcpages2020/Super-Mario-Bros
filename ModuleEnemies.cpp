@@ -8,7 +8,7 @@
 #include "Enemy.h"
 #include "Enemy_RedBird.h"
 #include "Enemy_BrownShip.h"
-#include "Enemy_Mech.h"
+#include "Enemy_Goomba.h"
 
 #define SPAWN_MARGIN 50
 
@@ -25,9 +25,7 @@ ModuleEnemies::~ModuleEnemies()
 
 bool ModuleEnemies::Start()
 {
-	// Create a prototype for each enemy available so we can copy them around
-	sprites = App->textures->Load("rtype/enemies.png");
-
+	sprites = App->textures->Load("Assets/Sprites/Characters/enemies.png");
 	return true;
 }
 
@@ -50,7 +48,6 @@ update_status ModuleEnemies::PreUpdate()
 	return UPDATE_CONTINUE;
 }
 
-// Called before render is available
 update_status ModuleEnemies::Update()
 {
 	for(uint i = 0; i < MAX_ENEMIES; ++i)
@@ -136,7 +133,7 @@ void ModuleEnemies::SpawnEnemy(const EnemyInfo& info)
 			enemies[i] = new Enemy_BrownShip(info.x, info.y);
 			break;
 			case ENEMY_TYPES::MECH:
-			enemies[i] = new Enemy_Mech(info.x, info.y);
+			enemies[i] = new Enemy_Goomba(info.x, info.y);
 			break;
 		}
 	}
