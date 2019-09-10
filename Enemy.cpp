@@ -6,7 +6,9 @@
 #include "ModulePlayer.h"
 
 Enemy::Enemy(int x, int y) : position(x, y)
-{}
+{
+	enemy_state = ENEMY_MOVE;
+}
 
 Enemy::~Enemy()
 {

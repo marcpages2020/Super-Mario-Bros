@@ -16,6 +16,7 @@ public:
 
 	Enemy_Goomba(int x, int y);
 	void Move();
+	void Die();
 	void OnCollision(Collider* c);
 };
 
