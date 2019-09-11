@@ -32,7 +32,11 @@ public:
 	virtual void Die() {};
 	virtual void Draw(SDL_Texture* sprites);
 	virtual void OnCollision(Collider* collider);
+
 	Enemy_State enemy_state;
+
+	bool dying = false;
+	int die_counter = 20;
 };
 
 #endif // __ENEMY_H__

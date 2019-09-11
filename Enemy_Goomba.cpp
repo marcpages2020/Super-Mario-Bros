@@ -20,11 +20,10 @@ Enemy_Goomba::Enemy_Goomba(int x, int y) : Enemy(x, y)
 		path.PushBack({ 0.3f, 0.0f }, 150, &move);
 	}
 
-	if (enemy_state == ENEMY_DIE)
+	else if (enemy_state == ENEMY_DIE)
 	{
 		path.PushBack({ 0,0 }, 0, &die);
 	}
-
 	collider = App->collision->AddCollider({0, 0, 16, 16}, COLLIDER_TYPE::COLLIDER_ENEMY, (Module*)App->enemies);
 	
 	original_pos.x = x;
@@ -38,9 +37,7 @@ void Enemy_Goomba::Move()
 }
 
 void Enemy_Goomba::Die() {
-
 }
 
 void Enemy_Goomba::OnCollision(Collider* c) {
-
 }

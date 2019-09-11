@@ -25,6 +25,8 @@ ModulePlayer::ModulePlayer()
 	//jump 
 	jump.PushBack({ 98,44,16,16 });
 
+	//die 
+	die.PushBack({229,43,14,17});
 
 	// Move down
 	/*
@@ -46,7 +48,7 @@ bool ModulePlayer::Start()
 	graphics = App->textures->Load("Assets/sprites/Characters/mario.png");
 
 	destroyed = false;
-	position.x = 180;
+	position.x = 80;
 	position.y = 183;
 	jumpTime = 0;
 	col = App->collision->AddCollider({0, 0, 12, 17}, COLLIDER_PLAYER, this);
@@ -208,6 +210,9 @@ update_status ModulePlayer::Update()
 		current_animation = &jump;
 		flip = SDL_FLIP_HORIZONTAL;
 		break;
+	case DIE:
+		current_animation = &die;
+		break;
 	default:
 		break;
 	}
@@ -226,15 +231,11 @@ update_status ModulePlayer::Update()
 
 	col->SetPos(position.x, position.y);
 	floor_col->SetPos(position.x, position.y + current_animation->GetCurrentFrame().h);
-	floor_col->SetSize(current_animation->GetCurrentFrame().w, 2);
+	floor_col->SetSize(current_animation->GetCurrentFrame().w, 4);
 	// Draw everything --------------------------------------
 	if(destroyed == false)
 		App->render->Blit(graphics, position.x, position.y, &(current_animation->GetCurrentFrame()),flip);
 
-	if ((colliding = false))
-	{
-		isFalling = true;
-	}
 	Gravity();
 	return UPDATE_CONTINUE;
 }
@@ -242,7 +243,7 @@ update_status ModulePlayer::Update()
 void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 {
 
-	if (c1 == col)
+	if ((c1 == col)&&(state != DIE))
 	{
 		switch (c2->type)
 		{
@@ -286,7 +287,13 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 				vy = 0;
 				position.y = c2->rect.y + c2->rect.h;
 			}
-
+			break;
+		case COLLIDER_ENEMY:
+			state = DIE;
+			vy = 6;
+			isFalling = true;
+			jumpMoment = SDL_GetTicks();
+			//position.y -= 30;
 			break;
 		default:
 			break;
@@ -294,18 +301,11 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 	}
 	else if (c1 == floor_col)
 	{
-		switch (c2->type)
+		if (c2->type == COLLIDER_ENEMY)
 		{
-		case COLLIDER_NONE:
-			if (wasFalling == false)
-			{
-				isFalling = true;
-			}
-		default:
-			break;
+			c2 == nullptr;
 		}
 	}
-	colliding = true;
 }
 
 void ModulePlayer::Gravity() {
@@ -315,4 +315,6 @@ void ModulePlayer::Gravity() {
 		position.y = position.y - vy * jumpTime + (0.5f * gravity * pow(jumpTime, 2));
 	}
 }
+
+
 

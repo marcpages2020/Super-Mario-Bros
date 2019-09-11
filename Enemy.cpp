@@ -39,6 +39,7 @@ void Enemy::OnCollision(Collider* collider)
 		break;
 	case COLLIDER_PLAYER_ATTACK:
 		enemy_state = ENEMY_DIE;
+		this->collider = nullptr;
 		break;
 	default:
 		break;

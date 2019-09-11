@@ -18,7 +18,6 @@ ModuleEnemies::ModuleEnemies()
 		enemies[i] = nullptr;
 }
 
-// Destructor
 ModuleEnemies::~ModuleEnemies()
 {
 }
@@ -31,17 +30,16 @@ bool ModuleEnemies::Start()
 
 update_status ModuleEnemies::PreUpdate()
 {
-	// check camera position to decide what to spawn
 	for(uint i = 0; i < MAX_ENEMIES; ++i)
 	{
 		if(queue[i].type != ENEMY_TYPES::NO_TYPE)
 		{
-			if(queue[i].x * SCREEN_SIZE < App->render->camera.x + (App->render->camera.w * SCREEN_SIZE) + SPAWN_MARGIN)
-			{
+			//if(queue[i].x * SCREEN_SIZE < App->render->camera.x + (App->render->camera.w * SCREEN_SIZE) + SPAWN_MARGIN)
+			//{
 				SpawnEnemy(queue[i]);
 				queue[i].type = ENEMY_TYPES::NO_TYPE;
 				LOG("Spawning enemy at %d", queue[i].x * SCREEN_SIZE);
-			}
+			//}
 		}
 	}
 
@@ -118,7 +116,6 @@ bool ModuleEnemies::AddEnemy(ENEMY_TYPES type, int x, int y)
 
 void ModuleEnemies::SpawnEnemy(const EnemyInfo& info)
 {
-	// find room for the new enemy
 	uint i = 0;
 	for(; enemies[i] != nullptr && i < MAX_ENEMIES; ++i);
 
@@ -132,7 +129,7 @@ void ModuleEnemies::SpawnEnemy(const EnemyInfo& info)
 			case ENEMY_TYPES::BROWNSHIP:
 			enemies[i] = new Enemy_BrownShip(info.x, info.y);
 			break;
-			case ENEMY_TYPES::MECH:
+			case ENEMY_TYPES::GOOMBA:
 			enemies[i] = new Enemy_Goomba(info.x, info.y);
 			break;
 		}
@@ -145,10 +142,22 @@ void ModuleEnemies::OnCollision(Collider* c1, Collider* c2)
 	{
 		if(enemies[i] != nullptr && enemies[i]->GetCollider() == c1)
 		{
-			App->slowdown->StartSlowdown(20, 60);
-			enemies[i]->OnCollision(c2);
-			delete enemies[i];
-			enemies[i] = nullptr;
+			if (c2->type == COLLIDER_PLAYER_ATTACK)
+			{
+				enemies[i]->OnCollision(c2);
+				enemies[i]->GetCollider() == nullptr;
+				enemies[i]->enemy_state = ENEMY_DIE;
+				if (enemies[i]->die_counter == 0)
+				{
+					delete enemies[i];
+					enemies[i] = nullptr;
+				}
+				else
+				{
+					enemies[i]->die_counter--;
+				}
+			}
+
 			break;
 		}
 	}

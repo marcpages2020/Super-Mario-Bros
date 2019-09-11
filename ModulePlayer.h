@@ -49,6 +49,7 @@ public:
 	Animation backward;
 	Animation jump;
 	Animation crouch;
+	Animation die;
 	iPoint position;
 	iPoint last_position;
 	Collider* col;
@@ -61,7 +62,7 @@ public:
 	bool wasFalling = false;
 	bool colliding = false;
 	float vy = 0;
-	float gravity = 21.8f;
+	double gravity = 21.8f;
 	float jumpTime = 0;
 	float jumpMoment = 0;
 	float deltaTime = 0;

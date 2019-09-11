@@ -63,7 +63,7 @@ bool ModuleLevel1::Start()
 		//App->enemies->AddEnemy(ENEMY_TYPES::BROWNSHIP, 870, 100);
 		//App->enemies->AddEnemy(ENEMY_TYPES::BROWNSHIP, 890, 100);
 
-		App->enemies->AddEnemy(ENEMY_TYPES::MECH, 300, 184);
+		App->enemies->AddEnemy(ENEMY_TYPES::GOOMBA , 200, 184);
 	}
 	return true;
 }
