@@ -36,7 +36,7 @@ public:
 	Enemy_State enemy_state;
 
 	bool dying = false;
-	int die_counter = 20;
+	int die_counter = 10;
 };
 
 #endif // __ENEMY_H__
