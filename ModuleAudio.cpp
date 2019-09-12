@@ -84,7 +84,6 @@ bool ModuleAudio::PlayMusic(const char* path, float fade_time)
 			Mix_HaltMusic();
 		}
 
-		// this call blocks until fade out is done
 		Mix_FreeMusic(music);
 	}
 
@@ -120,7 +119,7 @@ bool ModuleAudio::PlayMusic(const char* path, float fade_time)
 }
 
 // Load WAV
-uint ModuleAudio::LoadFx(const char* path)
+Mix_Chunk* ModuleAudio::LoadFx(const char* path)
 {
 	uint ret = 0;
 	Mix_Chunk* chunk = Mix_LoadWAV(path);
@@ -135,7 +134,7 @@ uint ModuleAudio::LoadFx(const char* path)
 		ret = last_fx++;
 	}
 
-	return ret;
+	return chunk;
 }
 
 // UnLoad WAV

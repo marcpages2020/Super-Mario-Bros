@@ -21,6 +21,7 @@ bool ModuleLevel1::Start()
 	LOG("Loading space scene");
 	
 	background = App->textures->Load("Assets/Sprites/Maps/world_1-1.png");
+	App->audio->PlayMusic("Assets/Sound/Music/main_theme.ogg");
 
 	App->player->Enable();
 	App->particles->Enable();
@@ -79,7 +80,7 @@ bool ModuleLevel1::CleanUp()
 	App->collision->Disable();
 	App->particles->Disable();
 	App->player->Disable();
-
+	
 	return true;
 }
 

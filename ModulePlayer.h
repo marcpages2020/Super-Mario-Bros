@@ -43,6 +43,9 @@ public:
 public:
 	State state;
 	SDL_Texture* graphics = nullptr;
+	Mix_Chunk* jump_fx = nullptr;
+	Mix_Chunk* die_fx = nullptr;
+
 	Animation* current_animation = nullptr;
 	Animation idle;
 	Animation forward;

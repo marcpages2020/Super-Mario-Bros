@@ -19,6 +19,7 @@ public:
 	
 	SDL_Texture* background = nullptr;
 	SDL_Texture* stars = nullptr;
+	Mix_Music* music;
 };
 
 #endif // __MODULELEVEL1_H__

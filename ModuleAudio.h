@@ -22,7 +22,7 @@ public:
 	bool PlayMusic(const char* path, float fade_time = DEFAULT_MUSIC_FADE_TIME);
 
 	// Load a WAV in memory
-	uint LoadFx(const char* path);
+	Mix_Chunk* LoadFx(const char* path);
 	bool UnLoadFx(uint id);
 
 	// Play a previously loaded WAV

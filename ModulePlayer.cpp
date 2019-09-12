@@ -10,6 +10,7 @@
 #include "ModuleSlowdown.h"
 #include "SDL/include/SDL.h"
 #include "ModuleCollision.h"
+#include "ModuleAudio.h"
 
 ModulePlayer::ModulePlayer()
 {
@@ -46,6 +47,8 @@ bool ModulePlayer::Start()
 	LOG("Loading player");
 
 	graphics = App->textures->Load("Assets/sprites/Characters/mario.png");
+	jump_fx = App->audio->LoadFx("Assets/Sound/FXs/jump.wav");
+	App->audio->LoadFx("Assets/Sound/FXs/die.wav");
 
 	destroyed = false;
 	position.x = 80;
